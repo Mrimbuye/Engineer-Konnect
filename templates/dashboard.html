@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Welcome back! 👋</h1>
+            <p class="text-muted">Here's what's happening in your network</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Profile Views</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">New Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Job Matches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">24</div>
+                <div class="stat-label">Connections</div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 3rem;">Quick Actions</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">📝 Start a Discussion</h3>
+                <p class="card-text">Share your thoughts and ask questions with the community.</p>
+                <a href="/discussions/new/" class="btn btn-primary">Create Discussion</a>
+            </div>
+            <div class="card">
+                <h3 class="card-title">💼 Browse Jobs</h3>
+                <p class="card-text">Explore new job opportunities tailored to your skills.</p>
+                <a href="/jobs/" class="btn btn-primary">View Jobs</a>
+            </div>
+            <div class="card">
+                <h3 class="card-title">👤 Edit Profile</h3>
+                <p class="card-text">Update your profile and showcase your expertise.</p>
+                <a href="/profile/edit/" class="btn btn-primary">Edit Profile</a>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 3rem;">Recent Activity</h2>
+        <div class="card" style="margin-bottom: 1rem;">
+            <h3 class="card-title">Latest Discussions</h3>
+            <div id="discussions" style="margin-top: 1rem;">
+                <p class="text-muted">Loading...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    // Load discussions if user is authenticated
+    if (token) {
+        fetch('/api/discussions/', {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const discussionsDiv = document.getElementById('discussions');
+            if (Array.isArray(data) && data.length > 0) {
+                discussionsDiv.innerHTML = data.slice(0, 5).map(d => `
+                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                        <h4>${d.title}</h4>
+                        <p class="text-muted">${d.content.substring(0, 100)}...</p>
+                        <small>${d.category} • ${d.created_at}</small>
+                    </div>
+                `).join('');
+            } else {
+                discussionsDiv.innerHTML = '<p class="text-muted">No discussions yet.</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Error loading discussions:', err);
+            document.getElementById('discussions').innerHTML = '<p class="text-muted">Unable to load discussions.</p>';
+        });
+    } else {
+        // Redirect to login if not authenticated
+        window.location.href = '/login/';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Engineer Konnect{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="navbar">
+            <a href="/" class="logo">🚀 Engineer Konnect</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/discussions/">Discussions</a></li>
+                <li><a href="/jobs/">Jobs</a></li>
+                <li><a href="/messages/">Messages</a></li>
+                <li><a href="/profile/">Profile</a></li>
+                <li><a href="/api/">API Docs</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Engineer Konnect. Connecting engineers worldwide.</p>
+            <p style="margin-top: 1rem; opacity: 0.8; font-size: 0.9rem;">
+                ~Developed by Kleins Dickson, GE
+            </p>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

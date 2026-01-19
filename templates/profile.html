@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Your Profile</h1>
+            <p class="text-muted">View and manage your professional profile</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">👤 Profile Information</h3>
+                <div id="profileInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+                <a href="/profile/edit/" class="btn btn-primary" style="margin-top: 1rem;">Edit Profile</a>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 Stats</h3>
+                <div id="profileStats">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 3rem;">Your Applications</h2>
+        <div class="card">
+            <div id="applications">
+                <p class="text-muted">Loading...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (token) {
+        // Load profile
+        fetch('/api/users/profiles/my_profile/', {
+            headers: { 'Authorization': `Token ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const user = data.user;
+            document.getElementById('profileInfo').innerHTML = `
+                <p><strong>Name:</strong> ${user.first_name} ${user.last_name}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Username:</strong> ${user.username}</p>
+                <p><strong>Specialization:</strong> ${data.specialization}</p>
+                <p><strong>Location:</strong> ${data.location}</p>
+                <p><strong>Experience:</strong> ${data.years_experience} years</p>
+            `;
+
+            document.getElementById('profileStats').innerHTML = `
+                <p><strong>Joined:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
+                <p><strong>Verified:</strong> ${data.is_verified ? '✓ Yes' : '✗ No'}</p>
+                <p><strong>Company:</strong> ${data.company || 'Not specified'}</p>
+            `;
+        })
+        .catch(err => console.error('Error loading profile:', err));
+    } else {
+        window.location.href = '/login/';
+    }
+</script>
+{% endblock %}

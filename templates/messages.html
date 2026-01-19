@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Messages</h1>
+            <p class="text-muted">Stay connected with your network</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+            <!-- Conversations List -->
+            <div>
+                <h3 style="margin-bottom: 1rem;">Conversations</h3>
+                <div id="conversations">
+                    <p class="text-muted">Loading conversations...</p>
+                </div>
+            </div>
+
+            <!-- Message Thread -->
+            <div class="card">
+                <h3 class="card-title" id="selectedUser">Select a conversation</h3>
+                <div id="messageThread" style="height: 400px; overflow-y: auto; margin: 1rem 0; padding: 1rem; background: #f9fafb; border-radius: 0.5rem;">
+                    <p class="text-muted">No conversation selected</p>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <textarea id="messageInput" placeholder="Type your message..." style="height: 80px;"></textarea>
+                    <button class="btn btn-primary" style="margin-top: 0.5rem; width: 100%;">Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (token) {
+        // Load conversations
+        fetch('/api/messages/', {
+            headers: { 'Authorization': `Token ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const conversationsDiv = document.getElementById('conversations');
+            if (Array.isArray(data) && data.length > 0) {
+                conversationsDiv.innerHTML = data.map((conv, idx) => `
+                    <div class="card" style="margin-bottom: 1rem; cursor: pointer; padding: 1rem;">
+                        <p><strong>${conv.participants?.[0]?.username || 'Unknown'}</strong></p>
+                        <p class="text-muted" style="font-size: 0.875rem;">Click to view messages</p>
+                    </div>
+                `).join('');
+            } else {
+                conversationsDiv.innerHTML = '<p class="text-muted">No conversations yet.</p>';
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    } else {
+        window.location.href = '/login/';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Job Opportunities</h1>
+            <p class="text-muted">Find your next dream role</p>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <input type="text" id="searchJobs" placeholder="Search jobs..." style="width: 100%; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+        </div>
+
+        <div id="jobs" style="margin-top: 2rem;">
+            <p class="text-muted">Loading jobs...</p>
+        </div>
+    </div>
+</section>
+
+<script>
+    function loadJobs(filter = '') {
+        fetch('/api/jobs/')
+        .then(res => res.json())
+        .then(data => {
+            const jobsDiv = document.getElementById('jobs');
+            let jobs = Array.isArray(data) ? data : [];
+            
+            if (filter) {
+                jobs = jobs.filter(j => 
+                    j.title.toLowerCase().includes(filter.toLowerCase()) ||
+                    j.description.toLowerCase().includes(filter.toLowerCase())
+                );
+            }
+
+            if (jobs.length > 0) {
+                jobsDiv.innerHTML = jobs.map(j => `
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <h3 class="card-title">${j.title}</h3>
+                                <p><strong>${j.company}</strong></p>
+                                <p class="card-text">${j.description.substring(0, 200)}...</p>
+                                <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                        ${j.job_type}
+                                    </span>
+                                    <span style="background: #dcfce7; color: #15803d; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                        💰 ${j.salary_range || 'Competitive'}
+                                    </span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                jobsDiv.innerHTML = '<p class="text-muted text-center">No jobs found matching your criteria.</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('jobs').innerHTML = '<p class="text-muted">Error loading jobs.</p>';
+        });
+    }
+
+    loadJobs();
+
+    document.getElementById('searchJobs').addEventListener('input', (e) => {
+        loadJobs(e.target.value);
+    });
+</script>
+{% endblock %}

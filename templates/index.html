@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Engineer Konnect{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>Welcome to Engineer Konnect</h1>
+        <p>Connect, collaborate, and grow with engineers worldwide</p>
+        <div style="margin-top: 2rem;">
+            <a href="/register/" class="btn btn-primary">Get Started</a>
+            <a href="/login/" class="btn btn-secondary" style="margin-left: 1rem;">Login</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section>
+    <div class="container">
+        <h2>Why Join Engineer Connect?</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">💼 Find Jobs</h3>
+                <p class="card-text">Discover exciting job opportunities from top companies looking for talented engineers.</p>
+            </div>
+            <div class="card">
+                <h3 class="card-title">💬 Engage in Discussions</h3>
+                <p class="card-text">Share knowledge, ask questions, and participate in industry discussions with peers.</p>
+            </div>
+            <div class="card">
+                <h3 class="card-title">🤝 Network</h3>
+                <p class="card-text">Build meaningful connections with engineers from around the world.</p>
+            </div>
+            <div class="card">
+                <h3 class="card-title">📚 Learn & Grow</h3>
+                <p class="card-text">Access resources, tutorials, and best practices shared by the community.</p>
+            </div>
+            <div class="card">
+                <h3 class="card-title">💰 Career Advancement</h3>
+                <p class="card-text">Showcase your skills and land your dream role with better visibility.</p>
+            </div>
+            <div class="card">
+                <h3 class="card-title">⚡ Fast Communication</h3>
+                <p class="card-text">Send direct messages to connect with hiring managers and fellow engineers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="background: linear-gradient(135deg, #2563eb, #1e40af); color: white; text-align: center;">
+    <div class="container">
+        <h2 style="color: white;">Ready to Connect?</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9;">
+            Join thousands of engineers building amazing things together
+        </p>
+        <a href="/register/" class="btn" style="background: white; color: #2563eb;">Start Your Journey Now</a>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section>
+    <div class="container">
+        <h2>Community Stats</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">5000+</div>
+                <div class="stat-label">Active Engineers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1200+</div>
+                <div class="stat-label">Job Postings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3500+</div>
+                <div class="stat-label">Discussions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">Satisfaction Rate</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

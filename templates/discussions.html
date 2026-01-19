@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Discussions - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Community Discussions</h1>
+            <p class="text-muted">Join conversations with engineers worldwide</p>
+            <a href="#" class="btn btn-primary" style="margin-top: 1rem;">Start New Discussion</a>
+        </div>
+
+        <div id="discussions" style="margin-top: 2rem;">
+            <p class="text-muted">Loading discussions...</p>
+        </div>
+    </div>
+</section>
+
+<script>
+    fetch('/api/discussions/')
+    .then(res => res.json())
+    .then(data => {
+        const discussionsDiv = document.getElementById('discussions');
+        if (Array.isArray(data) && data.length > 0) {
+            discussionsDiv.innerHTML = data.map(d => `
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h3 class="card-title">${d.title}</h3>
+                            <p class="card-text">${d.content.substring(0, 150)}...</p>
+                            <div style="margin-top: 1rem;">
+                                <span class="text-muted"><strong>${d.author?.username || 'Anonymous'}</strong></span>
+                                <span class="text-muted" style="margin-left: 1rem;">📅 ${new Date(d.created_at).toLocaleDateString()}</span>
+                                <span class="text-muted" style="margin-left: 1rem;">💬 ${d.comments?.length || 0} comments</span>
+                                <span class="text-muted" style="margin-left: 1rem;">👍 ${d.likes} likes</span>
+                            </div>
+                        </div>
+                        <span style="background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">
+                            ${d.category}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            discussionsDiv.innerHTML = '<p class="text-muted text-center">No discussions yet. Be the first to start one!</p>';
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        document.getElementById('discussions').innerHTML = '<p class="text-muted">Error loading discussions.</p>';
+    });
+</script>
+{% endblock %}
