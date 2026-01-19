@@ -3,52 +3,188 @@
 {% block title %}Discussions - Engineer Konnect{% endblock %}
 
 {% block content %}
-<section>
+<section style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: calc(100vh - 100px); padding: 2rem 0;">
     <div class="container">
         <div class="dashboard-header">
-            <h1>Community Discussions</h1>
-            <p class="text-muted">Join conversations with engineers worldwide</p>
-            <a href="#" class="btn btn-primary" style="margin-top: 1rem;">Start New Discussion</a>
+            <h1>💭 Community Discussions</h1>
+            <p class="text-muted">Share ideas and learn from engineers worldwide</p>
+            <button onclick="showNewDiscussionForm()" class="btn btn-primary" style="margin-top: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">✍️ Start New Discussion</button>
         </div>
 
+        <!-- Filter and Search -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem;">
+                <div>
+                    <input type="text" id="searchDiscussions" placeholder="🔍 Search discussions..." style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                </div>
+                <div>
+                    <select id="filterCategory" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                        <option value="">All Categories</option>
+                        <option value="technical">Technical</option>
+                        <option value="career">Career</option>
+                        <option value="projects">Projects</option>
+                        <option value="news">News & Updates</option>
+                    </select>
+                </div>
+                <button onclick="filterDiscussions()" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Filter</button>
+            </div>
+        </div>
+
+        <!-- Discussions List -->
         <div id="discussions" style="margin-top: 2rem;">
-            <p class="text-muted">Loading discussions...</p>
+            <div class="text-center" style="padding: 2rem;">
+                <p class="text-muted">🔄 Loading discussions...</p>
+            </div>
         </div>
     </div>
 </section>
 
+<style>
+    .discussion-card {
+        background: white;
+        border-left: 4px solid #667eea;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .discussion-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .discussion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .discussion-category {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .discussion-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .discussion-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .discussion-author {
+        font-weight: 600;
+        color: #2563eb;
+    }
+</style>
+
 <script>
-    fetch('/api/discussions/')
-    .then(res => res.json())
-    .then(data => {
-        const discussionsDiv = document.getElementById('discussions');
-        if (Array.isArray(data) && data.length > 0) {
-            discussionsDiv.innerHTML = data.map(d => `
-                <div class="card" style="margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div>
-                            <h3 class="card-title">${d.title}</h3>
-                            <p class="card-text">${d.content.substring(0, 150)}...</p>
-                            <div style="margin-top: 1rem;">
-                                <span class="text-muted"><strong>${d.author?.username || 'Anonymous'}</strong></span>
-                                <span class="text-muted" style="margin-left: 1rem;">📅 ${new Date(d.created_at).toLocaleDateString()}</span>
-                                <span class="text-muted" style="margin-left: 1rem;">💬 ${d.comments?.length || 0} comments</span>
-                                <span class="text-muted" style="margin-left: 1rem;">👍 ${d.likes} likes</span>
+    const token = localStorage.getItem('token');
+
+    function loadDiscussions(searchTerm = '', category = '') {
+        fetch('/api/discussions/', {
+            headers: token ? { 'Authorization': `Token ${token}` } : {}
+        })
+        .then(res => res.json())
+        .then(data => {
+            const discussionsDiv = document.getElementById('discussions');
+            if (Array.isArray(data) && data.length > 0) {
+                let filtered = data;
+
+                if (searchTerm) {
+                    filtered = filtered.filter(d => 
+                        d.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        d.content.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                }
+
+                if (category) {
+                    filtered = filtered.filter(d => d.category === category);
+                }
+
+                if (filtered.length === 0) {
+                    discussionsDiv.innerHTML = '<div class="card" style="text-align: center; padding: 2rem;"><p class="text-muted">No discussions found matching your search.</p></div>';
+                    return;
+                }
+
+                discussionsDiv.innerHTML = filtered.map(d => `
+                    <div class="card discussion-card">
+                        <div style="padding: 1.5rem;">
+                            <div class="discussion-header">
+                                <div style="flex: 1;">
+                                    <h3 class="card-title" style="margin: 0 0 0.5rem 0; cursor: pointer;" onclick="viewDiscussion(${d.id})">🔗 ${d.title}</h3>
+                                    <p class="card-text" style="color: #6b7280; margin: 0;">${d.content.substring(0, 200)}...</p>
+                                </div>
+                                <span class="discussion-category">${d.category || 'General'}</span>
+                            </div>
+                            
+                            <div class="discussion-meta">
+                                <div class="discussion-stat">
+                                    <span>👤</span>
+                                    <span class="discussion-author">${d.author?.username || 'Anonymous'}</span>
+                                </div>
+                                <div class="discussion-stat">
+                                    <span>📅</span>
+                                    <span class="text-muted">${new Date(d.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div class="discussion-stat">
+                                    <span>💬</span>
+                                    <span class="text-muted">${d.replies || 0} replies</span>
+                                </div>
+                                <div class="discussion-stat">
+                                    <span>👁️</span>
+                                    <span class="text-muted">${d.views || 0} views</span>
+                                </div>
+                                <div class="discussion-stat">
+                                    <span>👍</span>
+                                    <span class="text-muted">${d.likes || 0} likes</span>
+                                </div>
                             </div>
                         </div>
-                        <span style="background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">
-                            ${d.category}
-                        </span>
                     </div>
-                </div>
-            `).join('');
-        } else {
-            discussionsDiv.innerHTML = '<p class="text-muted text-center">No discussions yet. Be the first to start one!</p>';
+                `).join('');
+            } else {
+                discussionsDiv.innerHTML = '<div class="card" style="text-align: center; padding: 2rem;"><p class="text-muted">🎯 No discussions yet. Be the first to start one!</p></div>';
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('discussions').innerHTML = '<div class="card" style="text-align: center; padding: 2rem;"><p class="text-muted">Error loading discussions.</p></div>';
+        });
+    }
+
+    function filterDiscussions() {
+        const searchTerm = document.getElementById('searchDiscussions').value;
+        const category = document.getElementById('filterCategory').value;
+        loadDiscussions(searchTerm, category);
+    }
+
+    function showNewDiscussionForm() {
+        alert('✍️ New discussion form coming soon!');
+    }
+
+    function viewDiscussion(id) {
+        alert('Opening discussion #' + id);
+    }
+
+    // Search on enter
+    document.getElementById('searchDiscussions').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            filterDiscussions();
         }
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        document.getElementById('discussions').innerHTML = '<p class="text-muted">Error loading discussions.</p>';
     });
-</script>
-{% endblock %}
+
+    loadDiscussions();

@@ -36,3 +36,6 @@ def jobs(request):
 @require_http_methods(["GET"])
 def messages(request):
     return render(request, 'messages.html')
+@require_http_methods(["GET"])
+def connections(request):
+    return render(request, 'connections.html')

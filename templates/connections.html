@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Connections - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: calc(100vh - 100px); padding: 3rem 0;">
+    <div class="container">
+        <div class="dashboard-header" style="color: white;">
+            <h1>🌐 Find & Connect with Engineers</h1>
+            <p style="color: rgba(255,255,255,0.9);">Discover talented engineers and expand your professional network</p>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 class="card-title">🔍 Search & Filter</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Search by Name</label>
+                    <input type="text" id="searchName" placeholder="e.g., John Smith..." style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Engineer Type</label>
+                    <select id="filterType" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                        <option value="">All Types</option>
+                        <option value="student">Student</option>
+                        <option value="graduate">Graduate</option>
+                        <option value="professional">Professional</option>
+                        <option value="consulting">Consulting</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Specialization</label>
+                    <select id="filterSpec" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                        <option value="">All Specializations</option>
+                        <option value="software">Software Engineering</option>
+                        <option value="civil">Civil Engineering</option>
+                        <option value="mechanical">Mechanical Engineering</option>
+                        <option value="electrical">Electrical Engineering</option>
+                        <option value="chemical">Chemical Engineering</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: flex-end;">
+                    <button id="filterBtn" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Search Engineers</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Engineers Grid -->
+        <div id="engineersGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: white;">
+                <p style="font-size: 1.1rem;">🔄 Loading engineers...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .engineer-card {
+        background: white;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .engineer-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 16px rgba(0,0,0,0.15);
+    }
+
+    .engineer-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .engineer-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        border: 3px solid white;
+        object-fit: cover;
+    }
+
+    .engineer-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .engineer-type {
+        display: inline-block;
+        background: rgba(255,255,255,0.3);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .engineer-body {
+        padding: 1.5rem;
+        flex: 1;
+    }
+
+    .engineer-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .engineer-stat:last-child {
+        border-bottom: none;
+    }
+
+    .engineer-stat-label {
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+
+    .engineer-stat-value {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .engineer-footer {
+        padding: 1rem 1.5rem;
+        background: #f9fafb;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .engineer-footer button {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-connect {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-connect:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-profile {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+
+    .btn-profile:hover {
+        background: #667eea;
+        color: white;
+    }
+</style>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (token) {
+        // Load all engineers
+        function loadEngineers(filters = {}) {
+            fetch('/api/users/', {
+                headers: { 'Authorization': `Token ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                let engineers = Array.isArray(data) ? data : [];
+
+                // Apply filters
+                if (filters.name) {
+                    engineers = engineers.filter(e => 
+                        `${e.first_name} ${e.last_name}`.toLowerCase().includes(filters.name.toLowerCase())
+                    );
+                }
+                if (filters.type) {
+                    engineers = engineers.filter(e => e.engineer_type === filters.type);
+                }
+                if (filters.spec) {
+                    engineers = engineers.filter(e => e.specialization === filters.spec);
+                }
+
+                const grid = document.getElementById('engineersGrid');
+                
+                if (engineers.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: white; border-radius: 0.75rem;">
+                            <p style="font-size: 1.1rem; color: #6b7280;">😔 No engineers found matching your criteria</p>
+                            <p style="color: #9ca3af; margin-top: 0.5rem;">Try adjusting your filters</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = engineers.map(engineer => `
+                    <div class="engineer-card">
+                        <div class="engineer-header">
+                            <div class="engineer-avatar">
+                                ${engineer.profile_picture ? `<img src="${engineer.profile_picture}" alt="${engineer.first_name}" style="width: 100%; height: 100%;">` : '👨‍💼'}
+                            </div>
+                            <div class="engineer-name">${engineer.first_name || engineer.username}</div>
+                            <div class="engineer-type">${engineer.engineer_type?.charAt(0).toUpperCase() + engineer.engineer_type?.slice(1) || 'Engineer'}</div>
+                        </div>
+                        <div class="engineer-body">
+                            <div class="engineer-stat">
+                                <span class="engineer-stat-label">📚 Specialization</span>
+                                <span class="engineer-stat-value">${engineer.specialization || 'N/A'}</span>
+                            </div>
+                            <div class="engineer-stat">
+                                <span class="engineer-stat-label">⏱️ Experience</span>
+                                <span class="engineer-stat-value">${engineer.years_experience || 0} yrs</span>
+                            </div>
+                            <div class="engineer-stat">
+                                <span class="engineer-stat-label">🏢 Company</span>
+                                <span class="engineer-stat-value">${engineer.company || 'Not listed'}</span>
+                            </div>
+                            <div class="engineer-stat">
+                                <span class="engineer-stat-label">📍 Location</span>
+                                <span class="engineer-stat-value">${engineer.location || 'N/A'}</span>
+                            </div>
+                            ${engineer.country_of_practice ? `
+                            <div class="engineer-stat">
+                                <span class="engineer-stat-label">🌍 Country</span>
+                                <span class="engineer-stat-value">${engineer.country_of_practice}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="engineer-footer">
+                            <button class="btn-connect" onclick="sendConnection(${engineer.id}, '${engineer.first_name || engineer.username}')">💬 Connect</button>
+                            <button class="btn-profile" onclick="viewProfile(${engineer.id})">👁️ View Profile</button>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(err => console.error('Error loading engineers:', err));
+        }
+
+        // Send connection request
+        window.sendConnection = function(userId, name) {
+            // Create a new conversation/connection request
+            fetch('/api/messages/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    recipient_id: userId,
+                    message: `Hi ${name}, I'd like to connect with you!`
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(`✅ Connection request sent to ${name}!`);
+            })
+            .catch(err => {
+                alert('Failed to send connection request');
+                console.error(err);
+            });
+        };
+
+        // View engineer profile
+        window.viewProfile = function(userId) {
+            // Would navigate to engineer's profile page
+            window.location.href = `/engineer/${userId}/`;
+        };
+
+        // Filter button
+        document.getElementById('filterBtn').addEventListener('click', () => {
+            const filters = {
+                name: document.getElementById('searchName').value,
+                type: document.getElementById('filterType').value,
+                spec: document.getElementById('filterSpec').value
+            };
+            loadEngineers(filters);
+        });
+
+        // Search on enter
+        document.getElementById('searchName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('filterBtn').click();
+            }
+        });
+
+        // Load initial engineers
+        loadEngineers();
+    } else {
+        window.location.href = '/login/';
+    }
+</script>
+{% endblock %}

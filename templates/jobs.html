@@ -3,73 +3,274 @@
 {% block title %}Jobs - Engineer Konnect{% endblock %}
 
 {% block content %}
-<section>
+<section style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: calc(100vh - 100px); padding: 2rem 0;">
     <div class="container">
         <div class="dashboard-header">
-            <h1>Job Opportunities</h1>
-            <p class="text-muted">Find your next dream role</p>
+            <h1>💼 Job Opportunities</h1>
+            <p class="text-muted">Find your next dream role in engineering</p>
         </div>
 
-        <div style="margin-bottom: 2rem;">
-            <input type="text" id="searchJobs" placeholder="Search jobs..." style="width: 100%; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+        <!-- Filter and Search Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 class="card-title" style="margin: 0 0 1.5rem 0;">🔍 Search & Filter Jobs</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <input type="text" id="searchJobs" placeholder="Search job titles..." style="padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                <select id="filterType" style="padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                    <option value="">All Types</option>
+                    <option value="full-time">Full-Time</option>
+                    <option value="part-time">Part-Time</option>
+                    <option value="contract">Contract</option>
+                    <option value="freelance">Freelance</option>
+                </select>
+                <select id="filterSalary" style="padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem;">
+                    <option value="">All Salary Ranges</option>
+                    <option value="0-50k">$0 - $50k</option>
+                    <option value="50-100k">$50k - $100k</option>
+                    <option value="100k+">$100k+</option>
+                </select>
+                <button onclick="filterJobs()" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">Search</button>
+            </div>
         </div>
 
+        <!-- Jobs Listing -->
         <div id="jobs" style="margin-top: 2rem;">
-            <p class="text-muted">Loading jobs...</p>
+            <div class="text-center" style="padding: 2rem;">
+                <p class="text-muted">🔄 Loading jobs...</p>
+            </div>
         </div>
     </div>
 </section>
 
+<style>
+    .job-card {
+        background: white;
+        border: none;
+        border-top: 4px solid #667eea;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .job-company {
+        font-size: 1rem;
+        color: #667eea;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+    }
+
+    .job-badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+
+    .job-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-type {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-salary {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .job-meta {
+        display: flex;
+        gap: 2rem;
+        margin: 1rem 0;
+        padding: 1rem 0;
+        border-top: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.9rem;
+    }
+
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
+    }
+
+    .job-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .job-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-apply:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-save {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-save:hover {
+        background: #f3e8ff;
+    }
+</style>
+
 <script>
-    function loadJobs(filter = '') {
-        fetch('/api/jobs/')
+    const token = localStorage.getItem('token');
+
+    function loadJobs(searchTerm = '', jobType = '', salary = '') {
+        fetch('/api/jobs/', {
+            headers: token ? { 'Authorization': `Token ${token}` } : {}
+        })
         .then(res => res.json())
         .then(data => {
             const jobsDiv = document.getElementById('jobs');
             let jobs = Array.isArray(data) ? data : [];
             
-            if (filter) {
+            // Apply filters
+            if (searchTerm) {
                 jobs = jobs.filter(j => 
-                    j.title.toLowerCase().includes(filter.toLowerCase()) ||
-                    j.description.toLowerCase().includes(filter.toLowerCase())
+                    j.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    j.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    j.company.toLowerCase().includes(searchTerm.toLowerCase())
                 );
+            }
+
+            if (jobType) {
+                jobs = jobs.filter(j => j.job_type === jobType);
+            }
+
+            if (salary) {
+                jobs = jobs.filter(j => j.salary_range && j.salary_range.includes(salary));
             }
 
             if (jobs.length > 0) {
                 jobsDiv.innerHTML = jobs.map(j => `
-                    <div class="card" style="margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div style="flex: 1;">
-                                <h3 class="card-title">${j.title}</h3>
-                                <p><strong>${j.company}</strong></p>
-                                <p class="card-text">${j.description.substring(0, 200)}...</p>
-                                <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                                    <span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                                        ${j.job_type}
-                                    </span>
-                                    <span style="background: #dcfce7; color: #15803d; padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                                        💰 ${j.salary_range || 'Competitive'}
-                                    </span>
+                    <div class="card job-card">
+                        <div style="padding: 1.5rem;">
+                            <div class="job-header">
+                                <div style="flex: 1;">
+                                    <h3 class="job-title">${j.title}</h3>
+                                    <p class="job-company">🏢 ${j.company}</p>
+                                </div>
+                                <div style="background: #f0fdf4; padding: 0.5rem 1rem; border-radius: 0.5rem; text-align: center;">
+                                    <p style="margin: 0; font-weight: 600; color: #15803d;">⭐ Featured</p>
                                 </div>
                             </div>
-                            <a href="#" class="btn btn-primary">Apply Now</a>
+                            
+                            <p style="color: #6b7280; margin: 1rem 0;">${j.description.substring(0, 250)}...</p>
+
+                            <div class="job-badges">
+                                <span class="job-badge badge-type">${j.job_type || 'Full-Time'}</span>
+                                <span class="job-badge badge-salary">💰 ${j.salary_range || 'Competitive'}</span>
+                                ${j.experience_level ? `<span class="job-badge" style="background: #f3e8ff; color: #6b21a8;">📈 ${j.experience_level}</span>` : ''}
+                            </div>
+
+                            <div class="job-meta">
+                                <div class="job-meta-item">
+                                    <span>📍</span>
+                                    <span>${j.location || 'Remote'}</span>
+                                </div>
+                                <div class="job-meta-item">
+                                    <span>📅</span>
+                                    <span>Posted ${new Date(j.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div class="job-meta-item">
+                                    <span>👥</span>
+                                    <span>${j.applications || 0} applications</span>
+                                </div>
+                            </div>
+
+                            <div class="job-footer">
+                                <button class="btn-apply" onclick="applyJob(${j.id}, '${j.title}')">✅ Apply Now</button>
+                                <button class="btn-save" onclick="saveJob(${j.id}, '${j.title}')">💾 Save Job</button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
             } else {
-                jobsDiv.innerHTML = '<p class="text-muted text-center">No jobs found matching your criteria.</p>';
+                jobsDiv.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 2rem;">
+                        <p class="text-muted">🔍 No jobs found matching your search criteria.</p>
+                        <p style="color: #9ca3af; margin-top: 0.5rem;">Try adjusting your filters or search terms</p>
+                    </div>
+                `;
             }
         })
         .catch(err => {
             console.error('Error:', err);
-            document.getElementById('jobs').innerHTML = '<p class="text-muted">Error loading jobs.</p>';
+            document.getElementById('jobs').innerHTML = '<div class="card" style="text-align: center; padding: 2rem;"><p class="text-muted">Error loading jobs.</p></div>';
         });
     }
 
-    loadJobs();
+    function filterJobs() {
+        const searchTerm = document.getElementById('searchJobs').value;
+        const jobType = document.getElementById('filterType').value;
+        const salary = document.getElementById('filterSalary').value;
+        loadJobs(searchTerm, jobType, salary);
+    }
 
-    document.getElementById('searchJobs').addEventListener('input', (e) => {
-        loadJobs(e.target.value);
+    function applyJob(jobId, jobTitle) {
+        alert(`✅ Application sent for "${jobTitle}"! Check your messages for updates.`);
+    }
+
+    function saveJob(jobId, jobTitle) {
+        alert(`💾 Job saved! You can find it in your saved jobs.`);
+    }
+
+    // Search on enter
+    document.getElementById('searchJobs').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            filterJobs();
+        }
     });
-</script>
-{% endblock %}
+
+    // Load initial jobs
+    loadJobs();

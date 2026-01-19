@@ -41,6 +41,7 @@ urlpatterns = [
     path('discussions/', views.discussions, name='discussions'),
     path('jobs/', views.jobs, name='jobs'),
     path('messages/', views.messages, name='messages'),
+    path('connections/', views.connections, name='connections'),
 ]
 
 if settings.DEBUG:
