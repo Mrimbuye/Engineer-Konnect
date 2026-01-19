@@ -37,6 +37,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.profile_edit, name='profile-edit'),
     path('discussions/', views.discussions, name='discussions'),
     path('jobs/', views.jobs, name='jobs'),
     path('messages/', views.messages, name='messages'),

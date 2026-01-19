@@ -22,6 +22,10 @@ def profile(request):
     return render(request, 'profile.html')
 
 @require_http_methods(["GET"])
+def profile_edit(request):
+    return render(request, 'profile_edit.html')
+
+@require_http_methods(["GET"])
 def discussions(request):
     return render(request, 'discussions.html')
 

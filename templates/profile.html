@@ -6,30 +6,93 @@
 <section>
     <div class="container">
         <div class="dashboard-header">
-            <h1>Your Profile</h1>
-            <p class="text-muted">View and manage your professional profile</p>
+            <h1>Your Professional Profile</h1>
+            <p class="text-muted">View and manage your professional information</p>
+            <a href="/profile/edit/" class="btn btn-primary" style="margin-top: 1rem;">Edit Profile</a>
         </div>
 
+        <!-- Basic Information -->
+        <h2 style="margin-top: 3rem;">Basic Information</h2>
         <div class="grid">
             <div class="card">
-                <h3 class="card-title">👤 Profile Information</h3>
-                <div id="profileInfo">
+                <h3 class="card-title">👤 Personal Details</h3>
+                <div id="personalInfo">
                     <p class="text-muted">Loading...</p>
                 </div>
-                <a href="/profile/edit/" class="btn btn-primary" style="margin-top: 1rem;">Edit Profile</a>
             </div>
 
             <div class="card">
-                <h3 class="card-title">📊 Stats</h3>
-                <div id="profileStats">
+                <h3 class="card-title">📊 Professional Overview</h3>
+                <div id="professionalInfo">
                     <p class="text-muted">Loading...</p>
                 </div>
             </div>
         </div>
 
-        <h2 style="margin-top: 3rem;">Your Applications</h2>
+        <!-- Professional Information -->
+        <h2 style="margin-top: 3rem;">Professional Information</h2>
         <div class="card">
-            <div id="applications">
+            <h3 class="card-title">💼 Career Details</h3>
+            <div id="careerInfo">
+                <p class="text-muted">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Academic & Qualifications -->
+        <h2 style="margin-top: 3rem;">Academic & Qualifications</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">🎓 Academic Qualifications</h3>
+                <div id="academicInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📜 Certifications & Licenses</h3>
+                <div id="certificationsInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">🏢 Professional Associations</h3>
+                <div id="associationsInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Information -->
+        <h2 style="margin-top: 3rem;">Location Information</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title">🌍 Practice Location</h3>
+                <div id="locationInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📬 Contact Address</h3>
+                <div id="addressInfo">
+                    <p class="text-muted">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <h2 style="margin-top: 3rem;">Additional Information</h2>
+        <div class="card">
+            <h3 class="card-title">📝 Professional Bio</h3>
+            <div id="bioInfo">
+                <p class="text-muted">Loading...</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3 class="card-title">🔗 Portfolio & Links</h3>
+            <div id="portfolioInfo">
                 <p class="text-muted">Loading...</p>
             </div>
         </div>
@@ -47,22 +110,73 @@
         .then(res => res.json())
         .then(data => {
             const user = data.user;
-            document.getElementById('profileInfo').innerHTML = `
+            
+            // Personal Information
+            document.getElementById('personalInfo').innerHTML = `
                 <p><strong>Name:</strong> ${user.first_name} ${user.last_name}</p>
                 <p><strong>Email:</strong> ${user.email}</p>
                 <p><strong>Username:</strong> ${user.username}</p>
-                <p><strong>Specialization:</strong> ${data.specialization}</p>
-                <p><strong>Location:</strong> ${data.location}</p>
-                <p><strong>Experience:</strong> ${data.years_experience} years</p>
+                <p><strong>Phone:</strong> ${data.phone_number || 'Not provided'}</p>
             `;
 
-            document.getElementById('profileStats').innerHTML = `
-                <p><strong>Joined:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
+            // Professional Overview
+            document.getElementById('professionalInfo').innerHTML = `
+                <p><strong>Engineer Type:</strong> ${data.engineer_type?.charAt(0).toUpperCase() + data.engineer_type?.slice(1) || 'Not specified'}</p>
+                <p><strong>Specialization:</strong> ${data.specialization || 'Not specified'}</p>
+                <p><strong>Experience:</strong> ${data.years_experience} years</p>
+                <p><strong>Current Company:</strong> ${data.company || 'Not specified'}</p>
                 <p><strong>Verified:</strong> ${data.is_verified ? '✓ Yes' : '✗ No'}</p>
-                <p><strong>Company:</strong> ${data.company || 'Not specified'}</p>
+            `;
+
+            // Career Details
+            document.getElementById('careerInfo').innerHTML = `
+                <p><strong>Job Title:</strong> ${data.engineer_type?.charAt(0).toUpperCase() + data.engineer_type?.slice(1) || 'Not specified'}</p>
+                <p><strong>Years of Experience:</strong> ${data.years_experience}</p>
+                <p><strong>Organization:</strong> ${data.company || 'Not specified'}</p>
+                <p><strong>Member Since:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
+                <p><strong>Last Updated:</strong> ${new Date(data.updated_at).toLocaleDateString()}</p>
+            `;
+
+            // Academic Information
+            document.getElementById('academicInfo').innerHTML = `
+                <p>${data.academic_qualifications || '<em>No academic qualifications added yet.</em>'}</p>
+            `;
+
+            // Certifications
+            document.getElementById('certificationsInfo').innerHTML = `
+                <p>${data.certifications || '<em>No certifications added yet.</em>'}</p>
+            `;
+
+            // Professional Associations
+            document.getElementById('associationsInfo').innerHTML = `
+                <p>${data.professional_associations || '<em>No professional associations added yet.</em>'}</p>
+            `;
+
+            // Location Information
+            document.getElementById('locationInfo').innerHTML = `
+                <p><strong>Country:</strong> ${data.country_of_practice || 'Not specified'}</p>
+                <p><strong>City/Location:</strong> ${data.location || 'Not specified'}</p>
+            `;
+
+            // Address Information
+            document.getElementById('addressInfo').innerHTML = `
+                <p>${data.postal_address ? data.postal_address.replace(/\n/g, '<br>') : '<em>No postal address provided.</em>'}</p>
+            `;
+
+            // Bio
+            document.getElementById('bioInfo').innerHTML = `
+                <p>${data.bio || '<em>No bio added yet.</em>'}</p>
+            `;
+
+            // Portfolio
+            document.getElementById('portfolioInfo').innerHTML = `
+                ${data.portfolio_url ? `<p><strong>Portfolio Website:</strong> <a href="${data.portfolio_url}" target="_blank">${data.portfolio_url}</a></p>` : '<p><em>No portfolio URL provided.</em></p>'}
             `;
         })
-        .catch(err => console.error('Error loading profile:', err));
+        .catch(err => {
+            console.error('Error loading profile:', err);
+            alert('Error loading profile data');
+        });
     } else {
         window.location.href = '/login/';
     }

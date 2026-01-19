@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Engineer Konnect{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <h2 style="margin-bottom: 2rem;">Edit Your Professional Profile</h2>
+            
+            <form id="editProfileForm">
+                <!-- Basic Information -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Basic Information</h3>
+
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" id="first_name">
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" id="last_name">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" id="email">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone_number" id="phone_number" placeholder="+1234567890">
+                </div>
+
+                <!-- Professional Information -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Professional Information</h3>
+
+                <div class="form-group">
+                    <label>Engineer Type</label>
+                    <select name="engineer_type" id="engineer_type">
+                        <option value="student">Student</option>
+                        <option value="graduate">Graduate</option>
+                        <option value="professional">Professional</option>
+                        <option value="consulting">Consulting</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <select name="specialization" id="specialization">
+                        <option value="software">Software Engineering</option>
+                        <option value="civil">Civil Engineering</option>
+                        <option value="mechanical">Mechanical Engineering</option>
+                        <option value="electrical">Electrical Engineering</option>
+                        <option value="chemical">Chemical Engineering</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Years of Experience</label>
+                    <input type="number" name="years_experience" id="years_experience" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Company/Organization</label>
+                    <input type="text" name="company" id="company">
+                </div>
+
+                <!-- Academic & Certifications -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Academic & Qualifications</h3>
+
+                <div class="form-group">
+                    <label>Academic Qualifications</label>
+                    <textarea name="academic_qualifications" id="academic_qualifications" style="height: 80px;" placeholder="e.g., Bachelor's in Mechanical Engineering (2018), Master's in Civil Engineering (2021)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Professional Certifications & Licenses</label>
+                    <textarea name="certifications" id="certifications" style="height: 80px;" placeholder="e.g., PE License (Mechanical), PMP Certified, ISO 9001 Lead Auditor"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Professional Associations</label>
+                    <textarea name="professional_associations" id="professional_associations" style="height: 80px;" placeholder="e.g., Member of ASME, IEEE, ASCE"></textarea>
+                </div>
+
+                <!-- Location Information -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Location Information</h3>
+
+                <div class="form-group">
+                    <label>Country of Practice</label>
+                    <input type="text" name="country_of_practice" id="country_of_practice" placeholder="e.g., United States">
+                </div>
+
+                <div class="form-group">
+                    <label>City/Location</label>
+                    <input type="text" name="location" id="location" placeholder="e.g., New York, USA">
+                </div>
+
+                <div class="form-group">
+                    <label>Postal Address</label>
+                    <textarea name="postal_address" id="postal_address" style="height: 80px;" placeholder="123 Engineering St, Tech City, State 12345"></textarea>
+                </div>
+
+                <!-- Additional Information -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Additional Information</h3>
+
+                <div class="form-group">
+                    <label>Portfolio/Website URL</label>
+                    <input type="url" name="portfolio_url" id="portfolio_url" placeholder="https://yourportfolio.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Professional Bio</label>
+                    <textarea name="bio" id="bio" style="height: 100px;" placeholder="Tell other engineers about yourself..."></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                    <a href="/profile/" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        window.location.href = '/login/';
+    }
+
+    // Load profile data
+    fetch('/api/users/profiles/my_profile/', {
+        headers: { 'Authorization': `Token ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('first_name').value = data.user.first_name || '';
+        document.getElementById('last_name').value = data.user.last_name || '';
+        document.getElementById('email').value = data.user.email || '';
+        document.getElementById('specialization').value = data.specialization || 'other';
+        document.getElementById('location').value = data.location || '';
+        document.getElementById('company').value = data.company || '';
+        document.getElementById('years_experience').value = data.years_experience || 0;
+        document.getElementById('bio').value = data.bio || '';
+        
+        // New fields
+        document.getElementById('engineer_type').value = data.engineer_type || 'professional';
+        document.getElementById('phone_number').value = data.phone_number || '';
+        document.getElementById('academic_qualifications').value = data.academic_qualifications || '';
+        document.getElementById('certifications').value = data.certifications || '';
+        document.getElementById('professional_associations').value = data.professional_associations || '';
+        document.getElementById('country_of_practice').value = data.country_of_practice || '';
+        document.getElementById('postal_address').value = data.postal_address || '';
+        document.getElementById('portfolio_url').value = data.portfolio_url || '';
+    })
+    .catch(err => console.error('Error loading profile:', err));
+
+    // Handle form submission
+    document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            bio: document.getElementById('bio').value,
+            specialization: document.getElementById('specialization').value,
+            location: document.getElementById('location').value,
+            company: document.getElementById('company').value,
+            years_experience: parseInt(document.getElementById('years_experience').value),
+            engineer_type: document.getElementById('engineer_type').value,
+            phone_number: document.getElementById('phone_number').value,
+            academic_qualifications: document.getElementById('academic_qualifications').value,
+            certifications: document.getElementById('certifications').value,
+            professional_associations: document.getElementById('professional_associations').value,
+            country_of_practice: document.getElementById('country_of_practice').value,
+            postal_address: document.getElementById('postal_address').value,
+            portfolio_url: document.getElementById('portfolio_url').value,
+        };
+
+        try {
+            const response = await fetch('/api/users/profiles/update_profile/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                alert('Profile updated successfully!');
+                window.location.href = '/profile/';
+            } else {
+                const error = await response.json();
+                alert('Error: ' + JSON.stringify(error));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+</script>
+{% endblock %}
