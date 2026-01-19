@@ -46,10 +46,26 @@
             
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                showSuccess('Login Successful! 🎉', 'Welcome back! Redirecting to dashboard...', '');
-                setTimeout(() => {
+                
+                // Check if user is admin/staff
+                fetch('/api/users/profiles/my_profile/', {
+                    headers: { 'Authorization': `Token ${data.token}` }
+                })
+                .then(res => res.json())
+                .then(profile => {
+                    showSuccess('Login Successful! 🎉', 'Welcome back! Redirecting...', '');
+                    setTimeout(() => {
+                        if (profile.user.is_staff) {
+                            window.location.href = '/admin-dashboard/';
+                        } else {
+                            window.location.href = '/dashboard/';
+                        }
+                    }, 1500);
+                })
+                .catch(err => {
+                    // Fallback if profile fetch fails
                     window.location.href = '/dashboard/';
-                }, 1500);
+                });
             } else {
                 showError('Login Failed', 'Invalid username or password. Please try again.');
             }

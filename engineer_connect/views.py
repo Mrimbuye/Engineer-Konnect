@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 
 @require_http_methods(["GET"])
@@ -39,3 +39,9 @@ def messages(request):
 @require_http_methods(["GET"])
 def connections(request):
     return render(request, 'connections.html')
+
+@require_http_methods(["GET"])
+def admin_dashboard(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect('login')
+    return render(request, 'admin_dashboard.html')

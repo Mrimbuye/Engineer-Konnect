@@ -42,6 +42,7 @@ urlpatterns = [
     path('jobs/', views.jobs, name='jobs'),
     path('messages/', views.messages, name='messages'),
     path('connections/', views.connections, name='connections'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin-dashboard'),
 ]
 
 if settings.DEBUG:
