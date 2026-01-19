@@ -8,9 +8,16 @@
         <div style="max-width: 700px; margin: 0 auto;">
             <h2 style="margin-bottom: 2rem;">Edit Your Professional Profile</h2>
             
-            <form id="editProfileForm">
+            <form id="editProfileForm" enctype="multipart/form-data">
                 <!-- Basic Information -->
                 <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #2563eb;">Basic Information</h3>
+
+                <div class="form-group">
+                    <label>Profile Picture</label>
+                    <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+                    <small style="color: #666;">Max size: 5MB. Formats: JPG, PNG, GIF</small>
+                    <div id="currentProfilePic" style="margin-top: 1rem;"></div>
+                </div>
 
                 <div class="form-group">
                     <label>First Name</label>
@@ -157,6 +164,16 @@
         document.getElementById('country_of_practice').value = data.country_of_practice || '';
         document.getElementById('postal_address').value = data.postal_address || '';
         document.getElementById('portfolio_url').value = data.portfolio_url || '';
+        
+        // Display current profile picture
+        if (data.profile_picture) {
+            document.getElementById('currentProfilePic').innerHTML = `
+                <div style="max-width: 150px;">
+                    <p style="font-weight: bold; margin-bottom: 0.5rem;">Current Profile Picture:</p>
+                    <img src="${data.profile_picture}" alt="Current Profile" style="width: 100%; border-radius: 8px; border: 2px solid #e5e7eb;">
+                </div>
+            `;
+        }
     })
     .catch(err => console.error('Error loading profile:', err));
 
@@ -164,30 +181,36 @@
     document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const formData = {
-            bio: document.getElementById('bio').value,
-            specialization: document.getElementById('specialization').value,
-            location: document.getElementById('location').value,
-            company: document.getElementById('company').value,
-            years_experience: parseInt(document.getElementById('years_experience').value),
-            engineer_type: document.getElementById('engineer_type').value,
-            phone_number: document.getElementById('phone_number').value,
-            academic_qualifications: document.getElementById('academic_qualifications').value,
-            certifications: document.getElementById('certifications').value,
-            professional_associations: document.getElementById('professional_associations').value,
-            country_of_practice: document.getElementById('country_of_practice').value,
-            postal_address: document.getElementById('postal_address').value,
-            portfolio_url: document.getElementById('portfolio_url').value,
-        };
+        const formData = new FormData();
+        
+        // Text fields
+        formData.append('bio', document.getElementById('bio').value);
+        formData.append('specialization', document.getElementById('specialization').value);
+        formData.append('location', document.getElementById('location').value);
+        formData.append('company', document.getElementById('company').value);
+        formData.append('years_experience', parseInt(document.getElementById('years_experience').value));
+        formData.append('engineer_type', document.getElementById('engineer_type').value);
+        formData.append('phone_number', document.getElementById('phone_number').value);
+        formData.append('academic_qualifications', document.getElementById('academic_qualifications').value);
+        formData.append('certifications', document.getElementById('certifications').value);
+        formData.append('professional_associations', document.getElementById('professional_associations').value);
+        formData.append('country_of_practice', document.getElementById('country_of_practice').value);
+        formData.append('postal_address', document.getElementById('postal_address').value);
+        formData.append('portfolio_url', document.getElementById('portfolio_url').value);
+        
+        // File field
+        const fileInput = document.getElementById('profile_picture');
+        if (fileInput.files.length > 0) {
+            formData.append('profile_picture', fileInput.files[0]);
+        }
 
         try {
             const response = await fetch('/api/users/profiles/update_profile/', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Token ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: formData
             });
 
             if (response.ok) {
