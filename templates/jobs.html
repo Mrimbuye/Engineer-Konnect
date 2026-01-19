@@ -258,11 +258,11 @@
     }
 
     function applyJob(jobId, jobTitle) {
-        alert(`✅ Application sent for "${jobTitle}"! Check your messages for updates.`);
+        showSuccess('Application Sent! ✅', `<strong>${jobTitle}</strong><br><br>Your application has been submitted successfully. The employer will review and contact you soon!`);
     }
 
     function saveJob(jobId, jobTitle) {
-        alert(`💾 Job saved! You can find it in your saved jobs.`);
+        showSuccess('Job Saved! 💾', `<strong>${jobTitle}</strong> has been saved to your job list. You can find it in your profile.`);
     }
 
     // Search on enter

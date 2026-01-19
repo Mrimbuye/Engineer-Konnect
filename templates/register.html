@@ -69,13 +69,16 @@
             const data = await response.json();
             
             if (response.ok) {
-                alert('Registration successful! Please login.');
-                window.location.href = '/login/';
+                showSuccess('Welcome! 🎉', '<strong>' + formData.first_name + '</strong>, your account has been created successfully!', 'Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = '/login/';
+                }, 2000);
             } else {
-                alert('Error: ' + JSON.stringify(data));
+                const errorMsg = Object.values(data).flat().join('<br>') || 'Something went wrong';
+                showError('Registration Failed', errorMsg);
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            showError('Error', 'Failed to register: ' + error.message);
         }
     });
 </script>

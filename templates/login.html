@@ -46,13 +46,15 @@
             
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                alert('Login successful!');
-                window.location.href = '/dashboard/';
+                showSuccess('Login Successful! 🎉', 'Welcome back! Redirecting to dashboard...', '');
+                setTimeout(() => {
+                    window.location.href = '/dashboard/';
+                }, 1500);
             } else {
-                alert('Invalid credentials');
+                showError('Login Failed', 'Invalid username or password. Please try again.');
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            showError('Error', 'Login failed: ' + error.message);
         }
     });
 </script>

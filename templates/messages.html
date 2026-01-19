@@ -142,8 +142,7 @@
 
         // Create new conversation
         window.createConversation = function(userId) {
-            // This would create a new conversation with the user
-            alert('Starting conversation with user ' + userId);
+            showInfo('Start Conversation', 'Connection request sent! They will appear in your messages once they accept.');
         };
 
         // Search conversations
@@ -172,9 +171,12 @@
                     document.getElementById('messageInput').value = '';
                     loadConversations();
                 })
-                .catch(err => console.error('Error sending message:', err));
+                .catch(err => {
+                    console.error('Error sending message:', err);
+                    showError('Send Failed', 'Failed to send message. Please try again.');
+                });
             } else if (!selectedConvId) {
-                alert('Please select a conversation first');
+                showWarning('No Conversation Selected', 'Please select a conversation or find an engineer to message first!');
             }
         });
 

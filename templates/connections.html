@@ -267,18 +267,19 @@
             })
             .then(res => res.json())
             .then(data => {
-                alert(`✅ Connection request sent to ${name}!`);
+                showSuccess('Connection Request Sent! 💬', `<strong>${name}</strong> will receive your connection request. Start chatting once they accept!`);
             })
             .catch(err => {
-                alert('Failed to send connection request');
+                showError('Connection Failed', 'Failed to send connection request. Please try again.');
                 console.error(err);
             });
         };
 
         // View engineer profile
         window.viewProfile = function(userId) {
+            showInfo('Profile View', 'Individual engineer profile pages are coming soon!');
             // Would navigate to engineer's profile page
-            window.location.href = `/engineer/${userId}/`;
+            // window.location.href = `/engineer/${userId}/`;
         };
 
         // Filter button

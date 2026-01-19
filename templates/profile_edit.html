@@ -214,14 +214,17 @@
             });
 
             if (response.ok) {
-                alert('Profile updated successfully!');
-                window.location.href = '/profile/';
+                showSuccess('Profile Updated! ✨', 'Your professional profile has been saved successfully.', 'Redirecting to your profile...');
+                setTimeout(() => {
+                    window.location.href = '/profile/';
+                }, 1500);
             } else {
                 const error = await response.json();
-                alert('Error: ' + JSON.stringify(error));
+                const errorMsg = Object.values(error).flat().join('<br>') || 'Something went wrong';
+                showError('Update Failed', errorMsg);
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            showError('Error', 'Failed to update profile: ' + error.message);
         }
     });
 </script>
