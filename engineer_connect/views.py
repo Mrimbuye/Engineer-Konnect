@@ -101,7 +101,7 @@ def api_register(request):
 
     code = user.generate_verification_code()
 
-    # log the code for debugging
+    # log the code; this is useful for server-side monitoring but not shown to clients
     import logging
     logger = logging.getLogger(__name__)
     logger.info(f"Generated verification code for {user.email}: {code}")
@@ -113,9 +113,6 @@ def api_register(request):
         send_verification_sms(user.phone, code)
 
     resp = {'message': 'Account created. Please verify your account.'}
-    from django.conf import settings
-    if settings.DEBUG:
-        resp['verification_code'] = code
     return Response(resp, status=201)
 
 

@@ -21,6 +21,10 @@ class UserRegisterViewSet(viewsets.ViewSet):
                 user.save()
                 # generate and dispatch verification code
                 code = user.generate_verification_code()
+                # log the code server‑side; delivery happens via email/SMS helpers
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Generated verification code for {user.email}: {code}")
                 if request.data.get('send_email', True):
                     from users.utils import send_verification_email
                     send_verification_email(user, code)
@@ -31,9 +35,6 @@ class UserRegisterViewSet(viewsets.ViewSet):
                     'message': 'User registered successfully',
                     'user': UserSerializer(user).data
                 }
-                from django.conf import settings
-                if getattr(settings, 'DEBUG', False):
-                    response_data['verification_code'] = code
                 return Response(response_data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

@@ -19,6 +19,10 @@ def send_verification_email(user, code):
         # Don't raise - allow registration to proceed even if email fails
 
 def send_verification_sms(phone, code):
+    # print/log code in debug mode so testers can see it without a real gateway
+    if getattr(settings, 'DEBUG', False):
+        print(f"[DEBUG] verification SMS to {phone}: {code}")
+        logger.info(f"(DEBUG) verification SMS to {phone}: {code}")
     try:
         from twilio.rest import Client
         client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
