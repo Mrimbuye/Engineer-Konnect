@@ -33,6 +33,24 @@
         document.getElementById('emailField').value = params.get('email');
     }
 
+    // Get CSRF token from cookie (needed for Django's CSRF protection)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
     document.getElementById('verifyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -42,9 +60,12 @@
         };
 
         try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrftoken) headers['X-CSRFToken'] = csrftoken;
+
             const response = await fetch('/api/users/verify/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(formData)
             });
 
