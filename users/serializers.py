@@ -1,25 +1,22 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import EngineerProfile
+from .models import CustomUser
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name')
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone', 'is_verified')
 
 class EngineerProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    
     class Meta:
-        model = EngineerProfile
-        fields = '__all__'
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'bio', 'profile_picture', 'specialization', 'company', 'years_experience', 'location', 'skills', 'engineer_type', 'academic_qualifications', 'country_of_practice', 'postal_address', 'phone_number', 'certifications', 'professional_associations', 'portfolio_url')
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
     
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'email', 'password', 'password2', 'first_name', 'last_name')
     
     def validate(self, data):
@@ -28,6 +25,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
-        validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
+        password = validated_data.pop('password')
+        validated_data.pop('password2', None)
+        user = CustomUser.objects.create_user(password=password, **validated_data)
         return user

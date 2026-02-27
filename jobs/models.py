@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
 
 class JobPosting(models.Model):
     JOB_TYPE_CHOICES = [
@@ -15,7 +15,7 @@ class JobPosting(models.Model):
         ('senior', 'Senior'),
     ]
     
-    posted_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_postings')
+    posted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='job_postings')
     title = models.CharField(max_length=300)
     description = models.TextField()
     company = models.CharField(max_length=200)
@@ -47,7 +47,7 @@ class JobApplication(models.Model):
     ]
     
     job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name='applications')
-    applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_applications')
+    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='job_applications')
     resume_url = models.URLField()
     cover_letter = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')

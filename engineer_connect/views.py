@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.utils import timezone
 from datetime import timedelta
@@ -68,6 +69,7 @@ def admin_dashboard(request):
 # ─────────────────────────────────────────
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def api_register(request):
     data = request.data
 
@@ -109,6 +111,7 @@ def api_register(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def api_verify(request):
     email = request.data.get('email')
     code = request.data.get('code')

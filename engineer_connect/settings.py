@@ -95,9 +95,10 @@ AUTH_USER_MODEL = 'users.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -117,13 +118,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your@gmail.com'
 EMAIL_HOST_PASSWORD = 'your_app_password'
-DEFAULT_FROM_EMAIL = 'Engineer Konnect <your@gmail.com>'
+DEFAULT_FROM_EMAIL = 'Engineer Konnect <noreply@engineerkonnect.com>'
 
 # Twilio (for SMS)
 TWILIO_ACCOUNT_SID = 'your_account_sid'

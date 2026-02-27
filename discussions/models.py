@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
 
 class Discussion(models.Model):
     CATEGORY_CHOICES = [
@@ -10,7 +10,7 @@ class Discussion(models.Model):
         ('other', 'Other'),
     ]
     
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='discussions')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='discussions')
     title = models.CharField(max_length=300)
     content = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
@@ -28,7 +28,7 @@ class Discussion(models.Model):
 
 class Comment(models.Model):
     discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     likes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
