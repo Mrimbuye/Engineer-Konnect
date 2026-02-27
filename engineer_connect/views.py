@@ -101,13 +101,22 @@ def api_register(request):
 
     code = user.generate_verification_code()
 
+    # log the code for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Generated verification code for {user.email}: {code}")
+
     if data.get('send_email', True):
         send_verification_email(user, code)
 
     if data.get('send_sms') and user.phone:
         send_verification_sms(user.phone, code)
 
-    return Response({'message': 'Account created. Please verify your account.'}, status=201)
+    resp = {'message': 'Account created. Please verify your account.'}
+    from django.conf import settings
+    if settings.DEBUG:
+        resp['verification_code'] = code
+    return Response(resp, status=201)
 
 
 @api_view(['POST'])
