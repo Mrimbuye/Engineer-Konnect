@@ -17,6 +17,11 @@
         </div>
 
         <div class="form-group">
+            <label>Phone (with country code)</label>
+            <input type="tel" name="phone" placeholder="+15555555555">
+        </div>
+
+        <div class="form-group">
             <label>First Name</label>
             <input type="text" name="first_name">
         </div>
@@ -36,6 +41,14 @@
             <input type="password" name="password2" required>
         </div>
 
+        <div class="form-group">
+            <label>Send verification via</label>
+            <div>
+                <label><input type="checkbox" name="send_email" checked> Email</label>
+                <label style="margin-left:1rem;"><input type="checkbox" name="send_sms"> SMS</label>
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
     </form>
 
@@ -47,31 +60,38 @@
 <script>
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const formData = {
             username: document.querySelector('[name="username"]').value,
             email: document.querySelector('[name="email"]').value,
+            phone: document.querySelector('[name="phone"]').value,
             first_name: document.querySelector('[name="first_name"]').value,
             last_name: document.querySelector('[name="last_name"]').value,
             password: document.querySelector('[name="password"]').value,
             password2: document.querySelector('[name="password2"]').value,
+            send_email: document.querySelector('[name="send_email"]').checked,
+            send_sms: document.querySelector('[name="send_sms"]').checked,
         };
+
+        if (formData.send_sms && !formData.phone) {
+            showError('Validation', 'Please provide a phone number to receive SMS.');
+            return;
+        }
 
         try {
             const response = await fetch('/api/users/register/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
-                showSuccess('Welcome! 🎉', '<strong>' + formData.first_name + '</strong>, your account has been created successfully!', 'Redirecting to login...');
+                showSuccess('Account Created!', 'A verification code has been sent. Redirecting...', '');
                 setTimeout(() => {
-                    window.location.href = '/login/';
+                    // Pass email to verify page via URL param
+                    window.location.href = '/verify/?email=' + encodeURIComponent(formData.email);
                 }, 2000);
             } else {
                 const errorMsg = Object.values(data).flat().join('<br>') || 'Something went wrong';

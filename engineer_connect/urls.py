@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from . import views
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_root(request):
@@ -19,22 +20,26 @@ def api_root(request):
         'messages': request.build_absolute_uri('/api/messages/'),
     })
 
+
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
-    
+
     # API endpoints
     path('api/', api_root, name='api-root'),
     path('api/auth/login/', obtain_auth_token, name='api_token_auth'),
+    path('api/users/register/', views.api_register, name='api_register'),
+    path('api/users/verify/', views.api_verify, name='api_verify'),
     path('api/users/', include('users.urls')),
     path('api/discussions/', include('discussions.urls')),
     path('api/jobs/', include('jobs.urls')),
     path('api/messages/', include('messaging.urls')),
-    
+
     # Frontend pages
     path('', views.index, name='home'),
-    path('register/', views.register, name='register'),
-    path('login/', views.login, name='login'),
+    path('register/', views.register_page, name='register'),
+    path('login/', views.login_page, name='login'),
+    path('verify/', views.verify_page, name='verify'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.profile_edit, name='profile-edit'),
