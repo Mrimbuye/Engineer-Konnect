@@ -118,16 +118,22 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email
-# By default in development we keep the console backend; override via env vars
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+# Development: Uses console backend (codes printed to console/logs)
+# Production: Configure via environment variables with a real SMTP provider
+if DEBUG:
+    EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+else:
+    EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Engineer Konnect <noreply@engineerkonnect.com>')
 
-# Twilio (for SMS) - populate these via environment variables for production
-TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
-TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='')
+# Vonage SMS API (for SMS) - populate these via environment variables for production
+# Sign up at https://dashboard.nexmo.com/ to get your API credentials
+VONAGE_API_KEY = config('VONAGE_API_KEY', default='')
+VONAGE_API_SECRET = config('VONAGE_API_SECRET', default='')
+VONAGE_FROM_NUMBER = config('VONAGE_FROM_NUMBER', default='Engineer')

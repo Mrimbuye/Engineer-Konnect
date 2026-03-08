@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/auth/login/', obtain_auth_token, name='api_token_auth'),
     path('api/users/register/', views.api_register, name='api_register'),
     path('api/users/verify/', views.api_verify, name='api_verify'),
+    path('api/users/resend-code/', views.api_resend_verification_code, name='api_resend_code'),
     path('api/users/', include('users.urls')),
     path('api/discussions/', include('discussions.urls')),
     path('api/jobs/', include('jobs.urls')),

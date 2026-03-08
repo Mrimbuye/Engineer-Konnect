@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from django.conf import settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -88,32 +89,50 @@ def api_register(request):
     if CustomUser.objects.filter(email=data['email']).exists():
         return Response({'error': ['Email already registered.']}, status=400)
 
-    user = CustomUser.objects.create_user(
-        username=data['username'],
-        email=data['email'],
-        password=data['password'],
-        first_name=data.get('first_name', ''),
-        last_name=data.get('last_name', ''),
-        phone=data.get('phone', ''),
-        is_verified=False,
-        is_active=False,
-    )
+    try:
+        user = CustomUser.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password'],
+            first_name=data.get('first_name', ''),
+            last_name=data.get('last_name', ''),
+            phone=data.get('phone', ''),
+            is_verified=False,
+            is_active=False,
+        )
 
-    code = user.generate_verification_code()
+        code = user.generate_verification_code()
 
-    # log the code; this is useful for server-side monitoring but not shown to clients
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info(f"Generated verification code for {user.email}: {code}")
+        # log the code; this is useful for server-side monitoring
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Generated verification code for {user.email}: {code}")
 
-    if data.get('send_email', True):
-        send_verification_email(user, code)
+        email_sent = False
+        sms_sent = False
 
-    if data.get('send_sms') and user.phone:
-        send_verification_sms(user.phone, code)
+        if data.get('send_email', True):
+            email_sent = send_verification_email(user, code)
 
-    resp = {'message': 'Account created. Please verify your account.'}
-    return Response(resp, status=201)
+        if data.get('send_sms') and user.phone:
+            from users.sms_service import send_verification_sms as sms_send
+            sms_sent = sms_send(user.phone, code)
+
+        resp = {
+            'message': 'Account created. Please verify your account.',
+            'email': user.email,
+            'debug_info': {
+                'email_sent': email_sent,
+                'sms_sent': sms_sent,
+                'code_for_testing': code if getattr(settings, 'DEBUG', False) else None
+            } if getattr(settings, 'DEBUG', False) else {}
+        }
+        return Response(resp, status=201)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Registration error: {str(e)}")
+        return Response({'error': [str(e)]}, status=500)
 
 
 @api_view(['POST'])
@@ -146,3 +165,52 @@ def api_verify(request):
     user.save()
 
     return Response({'message': 'Account verified successfully! You can now log in.'}, status=200)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_resend_verification_code(request):
+    """Resend verification code to email and/or SMS"""
+    email = request.data.get('email')
+    phone = request.data.get('phone')
+    send_email = request.data.get('send_email', True)
+    send_sms = request.data.get('send_sms', False)
+
+    if not email:
+        return Response({'error': 'Email is required.'}, status=400)
+
+    try:
+        user = CustomUser.objects.get(email=email)
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=404)
+
+    if user.is_verified:
+        return Response({'error': 'User is already verified.'}, status=400)
+
+    # Generate new verification code
+    code = user.generate_verification_code()
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Resent verification code for {user.email}: {code}")
+
+    email_sent = False
+    sms_sent = False
+
+    if send_email:
+        email_sent = send_verification_email(user, code)
+
+    if send_sms and (phone or user.phone):
+        from users.sms_service import send_verification_sms as sms_send
+        target_phone = phone or user.phone
+        sms_sent = sms_send(target_phone, code)
+
+    resp = {
+        'message': 'Verification code resent successfully.',
+        'debug_info': {
+            'email_sent': email_sent,
+            'sms_sent': sms_sent,
+            'code_for_testing': code if getattr(settings, 'DEBUG', False) else None
+        } if getattr(settings, 'DEBUG', False) else {}
+    }
+    return Response(resp, status=200)
