@@ -21,6 +21,8 @@
         <button type="submit" class="btn btn-primary" style="width: 100%;">Verify Account</button>
     </form>
 
+    <button onclick="resendCode()" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem; background-color: #6c757d;">Resend Code</button>
+
     <div class="auth-links">
         <p><a href="/register/">Back to Register</a></p>
     </div>
@@ -83,6 +85,47 @@
             showError('Error', 'Failed to verify: ' + error.message);
         }
     });
+
+    async function resendCode() {
+        const email = document.querySelector('[name="email"]').value;
+        
+        if (!email) {
+            showError('Error', 'Please enter your email address first.');
+            return;
+        }
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrftoken) headers['X-CSRFToken'] = csrftoken;
+
+            const response = await fetch('/api/users/resend-code/', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ 
+                    email: email,
+                    send_email: true,
+                    send_sms: false
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                let message = 'Verification code resent successfully!';
+                
+                // Show test code in debug mode
+                if (data.debug_info && data.debug_info.code_for_testing) {
+                    message += `<br><br><strong>🔧 DEBUG MODE 🔧</strong><br>Your verification code is: <strong style="font-size: 1.2em; color: #0066ff;">${data.debug_info.code_for_testing}</strong>`;
+                }
+                
+                showSuccess('Code Resent! 📧', message, '');
+            } else {
+                showError('Error', data.error || 'Failed to resend code.');
+            }
+        } catch (error) {
+            showError('Error', 'Failed to resend code: ' + error.message);
+        }
+    }
 </script>
 {% endblock %}
 ```

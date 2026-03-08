@@ -111,11 +111,18 @@
             const data = await response.json();
 
             if (response.ok) {
-                showSuccess('Account Created!', 'A verification code has been sent. Redirecting...', '');
+                let message = 'A verification code has been sent.';
+                
+                // Show test code in debug mode
+                if (data.debug_info && data.debug_info.code_for_testing) {
+                    message += `<br><br><strong>🔧 DEBUG MODE 🔧</strong><br>Your verification code is: <strong style="font-size: 1.3em; color: #0066ff;">${data.debug_info.code_for_testing}</strong>`;
+                }
+                
+                showSuccess('Account Created!', message, '');
                 setTimeout(() => {
                     // Pass email to verify page via URL param
                     window.location.href = '/verify/?email=' + encodeURIComponent(formData.email);
-                }, 2000);
+                }, 3000);
             } else {
                 const errorMsg = Object.values(data).flat().join('<br>') || 'Something went wrong';
                 showError('Registration Failed', errorMsg);
